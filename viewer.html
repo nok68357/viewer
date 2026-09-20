@@ -2,12 +2,25 @@
 <html lang="th" style="margin: 0; height: 100%; overflow: hidden; background-color: black;">
 <head>
     <meta charset="UTF-8">
-    <title>หน้าจอนำเสนอ</title>
+    <title>หน้าจอนำเสนอ (Viewer)</title>
 </head>
 <body style="margin: 0; height: 100%; overflow: hidden; background-color: black;">
-    <!-- เปลี่ยน URL ด้านล่างให้เป็นลิงก์ /exec ของคุณ และต้องมี #viewer ต่อท้าย -->
-    <iframe src="https://script.google.com/macros/s/AKfycbzot3DxWEoDX3ggWXajZdF5VlI-LOROW4o_MCVxOt5zsKI3GfeohqqZczZARkatbPuu/exec#viewer" 
-            style="width: 100vw; height: 100vh; border: none; display: block;">
-    </iframe>
+    
+    <!-- iframe ว่างๆ ที่จะถูกเติมลิงก์ด้วย Javascript -->
+    <iframe id="app-frame" style="width: 100vw; height: 100vh; border: none; display: block;"></iframe>
+
+    <script>
+        // ดึงพารามิเตอร์ ?app= จาก URL 
+        const urlParams = new URLSearchParams(window.location.search);
+        let appUrl = urlParams.get('app');
+
+        // ถ้ามีลิงก์ส่งมา ให้เอาไปใส่ใน iframe พร้อมเติม #viewer ให้อัตโนมัติ
+        if (appUrl) {
+            document.getElementById('app-frame').src = appUrl + '#viewer';
+        } else {
+            // ถ้าไม่ใส่ลิงก์มา จะแสดงข้อความแจ้งเตือน
+            document.body.innerHTML = '<h2 style="color:white; text-align:center; margin-top:20%; font-family: sans-serif;">กรุณาใส่ ?app=ลิงก์แอป ต่อท้าย URL</h2>';
+        }
+    </script>
 </body>
 </html>
