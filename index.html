@@ -1,26 +1,61 @@
 <!DOCTYPE html>
-<html lang="th" style="margin: 0; height: 100%; overflow: hidden; background-color: black;">
+<html lang="th">
 <head>
     <meta charset="UTF-8">
     <title>หน้าจอนำเสนอ (Viewer)</title>
-</head>
-<body style="margin: 0; height: 100%; overflow: hidden; background-color: black;">
-    
-    <!-- iframe ว่างๆ ที่จะถูกเติมลิงก์ด้วย Javascript -->
-    <iframe id="app-frame" style="width: 100vw; height: 100vh; border: none; display: block;"></iframe>
-
-    <script>
-        // ดึงพารามิเตอร์ ?app= จาก URL 
-        const urlParams = new URLSearchParams(window.location.search);
-        let appUrl = urlParams.get('app');
-
-        // ถ้ามีลิงก์ส่งมา ให้เอาไปใส่ใน iframe พร้อมเติม #viewer ให้อัตโนมัติ
-        if (appUrl) {
-            document.getElementById('app-frame').src = appUrl + '#viewer';
-        } else {
-            // ถ้าไม่ใส่ลิงก์มา จะแสดงข้อความแจ้งเตือน
-            document.body.innerHTML = '<h2 style="color:white; text-align:center; margin-top:20%; font-family: sans-serif;">กรุณาใส่ ?app=ลิงก์แอป ต่อท้าย URL</h2>';
+    <style>
+        body { 
+            margin: 0; 
+            height: 100vh; 
+            background-color: black; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            overflow: hidden; 
         }
+        #viewer-image {
+            width: 100%;
+            height: 100%;
+            object-fit: contain; /* ค่าเริ่มต้น */
+            opacity: 0;
+            transition: opacity 0.4s ease-in-out;
+            /* ป้องกันภาพแตกเวลาย่อขยาย */
+            transform: translateZ(0);
+            backface-visibility: hidden;
+        }
+    </style>
+</head>
+<body>
+    <img id="viewer-image" src="" alt="">
+    
+    <script>
+        // รอรับคำสั่งรูปภาพที่ส่งมาจากแผงควบคุม (Controller)
+        window.addEventListener('message', function(event) {
+            const data = event.data;
+            
+            if (data && data.type === 'SYNC_STATE') {
+                const imgEl = document.getElementById('viewer-image');
+                
+                if (!data.image) {
+                    imgEl.style.opacity = 0;
+                    return;
+                }
+
+                // ซ่อนรูปเก่าเพื่อทำเอฟเฟกต์เฟด (Fade)
+                imgEl.style.opacity = 0;
+                
+                setTimeout(() => {
+                    imgEl.src = data.image.url;
+                    // สลับโหมดเต็มจอ หรือ ขยายเต็ม (ยืดภาพ)
+                    imgEl.style.objectFit = data.mode === 'contain' ? 'contain' : 'fill';
+                    
+                    // แสดงรูปเมื่อรูปโหลดเสร็จสมบูรณ์
+                    imgEl.onload = () => {
+                        imgEl.style.opacity = 1;
+                    };
+                }, 300);
+            }
+        });
     </script>
 </body>
 </html>
